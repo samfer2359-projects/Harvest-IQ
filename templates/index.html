@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Disease Prediction</title>
+</head>
+<body>
+    <h1>Upload Plant Image for Disease Prediction</h1>
+    <form action="/predict" method="POST" enctype="multipart/form-data">
+        <input type="file" name="image" accept="image/*" required><br><br>
+        <input type="submit" value="Upload and Predict">
+    </form>
+
+    <h2>Prediction Result:</h2>
+    <textarea rows="2" cols="50" readonly>{{ result }}</textarea>
+
+    <h2>Treatment Suggestion:</h2>
+    <textarea rows="10" cols="50" readonly>{{ suggestion }}</textarea>
+
+</body>
+</html>

@@ -285,3 +285,8 @@ nir = ds.sel(band="B08")
 
 ndvi = (nir - red) / (nir + red)
 print("NDVI dataset ready:", ndvi)
+
+# Save NDVI dataset as .pkl
+import joblib
+joblib.dump(ndvi, 'ndvi_output.pkl')
+print("✅ NDVI dataset saved as 'ndvi_output.pkl'")

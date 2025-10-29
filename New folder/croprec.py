@@ -87,3 +87,9 @@ sample_input = np.array([[90, 42, 43, 20.5, 82, 6.5, 200]])  # example values
 predicted_crop = model.predict(sample_input)
 
 print(f"Recommended Crop for given conditions: {predicted_crop[0]}")
+
+# Add at the top (if not already imported)
+import joblib  # to load the saved model
+
+# Add at the bottom (or before you use the model in routes)
+crop_model = joblib.load('crop_recommendation_model.pkl')

@@ -1,250 +1,157 @@
-from flask import Flask, request, render_template
-import tensorflow as tf
-import numpy as np
-from PIL import Image
+from flask import Flask, render_template, request, redirect, url_for
 import os
 import joblib
-import geemap
-import stackstac
-import xarray as xr
+import numpy as np
+from keras.models import load_model
+from PIL import Image
+from io import BytesIO
+import tensorflow as tf
+from werkzeug.utils import secure_filename
+import pandas as pd
+import matplotlib.pyplot as plt  # <-- Add this import for plotting
 
-# Initialize Flask app
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'uploads'
 
-# Load trained model for plant disease prediction
-model = tf.keras.models.load_model("best_plant_disease_model.h5")
-
-# Class names from dataset for plant diseases
-class_names = [
-    'Pepper__bell___Bacterial_spot', 
-    'Pepper__bell___healthy', 
-    'Potato___Early_blight', 
-    'Potato___Late_blight', 
-    'Potato___healthy', 
-    'Tomato_Bacterial_spot', 
-    'Tomato_Early_blight', 
-    'Tomato_Late_blight',
-    'Tomato_Leaf_Mold', 
-    'Tomato_Septoria_leaf_spot', 
-    'Tomato_Spider_mites_Two_spotted_spider_mite', 
-    'Tomato__Target_Spot', 
-    'Tomato__Tomato_YellowLeaf__Curl_Virus', 
-    'Tomato__Tomato_mosaic_virus', 
-    'Tomato_healthy'
-]
-
-# Treatment suggestions dictionary for plant diseases
-treatment_suggestions = {
-    'Pepper__bell___Bacterial_spot': (
-        "Remove infected leaves, avoid overhead irrigation, use copper-based sprays. \n\n"
-        "Source: UC IPM (https://ipm.ucanr.edu/agriculture/peppers/bacterial-spot/?utm_source=chatgpt.com#gsc.tab=0)"
-    ),
-    'Pepper__bell___healthy': "Plant appears healthy. Continue watering properly and maintain good air circulation.",
-    'Potato___Early_blight': (
-        "Rotate crops, stake plants for airflow, mulch to prevent soil splash, and apply early fungicide. \n\n"
-        "Source: Cornell University (https://www.vegetables.cornell.edu/pest-management/disease-factsheets/managing-tomato-diseases-successfully/)"
-    ),
-    'Potato___Late_blight': (
-        "Destroy infected plants, avoid water on leaves, and apply recommended fungicides. \n\n"
-        "Source: Cornell University (https://www.vegetables.cornell.edu/pest-management/disease-factsheets/managing-tomato-diseases-successfully/)"
-    ),
-    'Potato___healthy': "Healthy plant! Maintain crop rotation and monitor regularly for blight symptoms.",
-    'Tomato_Bacterial_spot': (
-        "Use certified disease-free seeds, avoid overhead watering, and spray copper fungicides. \n\n"
-        "Source: UC IPM (https://ipm.ucanr.edu/agriculture/tomato/bacterial-spot/)"
-    ),
-    'Tomato_Early_blight': (
-        "Remove lower infected leaves, stake plants, rotate crops, and start fungicide early. \n\n"
-        "Source: Cornell University (https://www.vegetables.cornell.edu/pest-management/disease-factsheets/managing-tomato-diseases-successfully/)"
-    ),
-    'Tomato_Late_blight': (
-        "Destroy infected plants immediately, use fungicides in cool humid conditions, and rotate crops. \n\n"
-        "Source: Cornell University (https://www.vegetables.cornell.edu/pest-management/disease-factsheets/managing-tomato-diseases-successfully/)"
-    ),
-    'Tomato_Leaf_Mold': (
-        "Reduce humidity, increase ventilation, prune lower leaves, and apply fungicides if needed. \n\n"
-        "Source: University of Minnesota Extension (https://extension.umn.edu/plant-diseases/tomato-leaf-spot-diseases)"
-    ),
-    'Tomato_Septoria_leaf_spot': (
-        "Remove infected leaves, mulch to avoid soil splash, avoid dense planting, and use fungicide early. \n\n"
-        "Source: University of Minnesota Extension (https://extension.umn.edu/plant-diseases/tomato-leaf-spot-diseases)"
-    ),
-    'Tomato_Spider_mites_Two_spotted_spider_mite': (
-        "Spray water to reduce dust, apply insecticidal soap or neem oil, and increase humidity. \n\n"
-        "Source: University of Maryland (https://www.extension.umd.edu/resource/expect-see-two-spotted-spider-mites-vegetables/?utm_source=chatgpt.com)"
-    ),
-    'Tomato__Target_Spot': (
-        "Improve airflow, rotate crops, and apply fungicide at early symptoms. \n\n"
-        "Source: Bayer Crop Science (https://www.vegetables.bayer.com/us/en-us/resources/growing-tips-and-innovation-articles/agronomic-spotlights/target-spot-of-tomato.html)"
-    ),
-    'Tomato__Tomato_YellowLeaf__Curl_Virus': (
-        "Control whiteflies (the insect vector), remove infected plants, and use resistant varieties. \n\n"
-        "Source: North Carolina State University (https://content.ces.ncsu.edu/tomato-yellow-leaf-curl-virus?utm_source=chatgpt.com)"
-    ),
-    'Tomato__Tomato_mosaic_virus': (
-        "Avoid tobacco handling near tomatoes, disinfect tools, and remove infected plants immediately. \n\n"
-        "Source: UC IPM (https://ipm.ucanr.edu/agriculture/tomato/mosaic-diseases-caused-by-potyviruses/?utm_source=chatgpt.com#gsc.tab=0)"
-    ),
-    'Tomato_healthy': "Plant is healthy! Keep practicing crop rotation, watering at the base, and regular monitoring."
-}
-
-# ---------------------------
-# 1️⃣ Crop Recommendation Model Section
-# ---------------------------
-
-# Load the pre-trained crop recommendation model
+# Load the crop recommendation model
 crop_model = joblib.load('crop_recommendation_model.pkl')
 
-# Crop recommendation function based on soil and weather conditions
-def recommend_crop(soil_data):
-    try:
-        soil_data = np.array([soil_data])  # Ensure it's in the right shape for prediction
-        return crop_model.predict(soil_data)[0]  # Make the prediction
-    except Exception as e:
-        return f"Error in crop recommendation: {e}"
+# Load the plant disease model (VGG19)
+disease_model = load_model('best_plant_disease_model.h5')
 
-# ---------------------------
-# 2️⃣ NDVI (Satellite) Model Section
-# ---------------------------
+# Directory to save uploaded files
+UPLOAD_FOLDER = 'static'  # Save to static folder for easy access via URL
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# NDVI processing function using satellite images (Sentinel-2)
-def process_ndvi(bbox, time_range):
-    try:
-        # Load and search Sentinel-2 data (connect to STAC API)
-        catalog = geemap.pystac_client.Client.open("https://planetarycomputer.microsoft.com/api/stac/v1")
-        search = catalog.search(
-            collections=["sentinel-2-l2a"],
-            bbox=bbox,
-            datetime=time_range,
-            query={"eo:cloud_cover": {"lt": 20}}  # Filter for less than 20% cloud cover
-        )
-
-        items = list(search.get_items())
-        if len(items) == 0:
-            return "No images found in this region and date range."
-
-        # Stack Sentinel-2 imagery (Red and NIR bands for NDVI calculation)
-        ds = stackstac.stack(
-            items,
-            assets=["B04", "B08"],  # Red (B04) and NIR (B08)
-            bounds_latlon=bbox,
-            epsg=4326,               # WGS84 CRS
-            resolution=0.00025
-        )
-
-        # Compute NDVI
-        red = ds.sel(band="B04")
-        nir = ds.sel(band="B08")
-        ndvi = (nir - red) / (nir + red)
-        return ndvi.median(dim="time")  # Return the median NDVI over time
-    except Exception as e:
-        return f"Error in NDVI processing: {e}"
-
-# ---------------------------
-# Prediction function for plant disease
-# ---------------------------
-def predict_image(image_path):
-    img = Image.open(image_path).resize((256, 256))
-    img = np.array(img)
-
-    # Remove alpha channel if present
-    if img.shape[-1] == 4:
-        img = img[:, :, :3]  # Keep only RGB
-
-    img = tf.keras.applications.vgg19.preprocess_input(img)  # Process image
-    img = np.expand_dims(img, axis=0)  # Add extra dimension because model expects a batch of images
-
-    predictions = model.predict(img)
-    predicted_index = np.argmax(predictions)
-    predicted_label = class_names[predicted_index]
-    suggestion = treatment_suggestions.get(predicted_label, "No treatment information available for this disease.")
-
-    return predicted_label, suggestion
-
-
-# ---------------------------
-# Routes for web pages
-# ---------------------------
+# Ensure the upload folder exists
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
+@app.route('/ndvi', methods=['GET', 'POST'])
+def ndvi():
+    if request.method == 'POST':
+        # Extract form data
+        lon_min = float(request.form['lon_min'])
+        lat_min = float(request.form['lat_min'])
+        lon_max = float(request.form['lon_max'])
+        lat_max = float(request.form['lat_max'])
+        time_range = request.form['time_range']
+
+        # NDVI calculation - Placeholder logic (use actual NDVI calculation in practice)
+        # Example: NDVI = (NIR - RED) / (NIR + RED), just for demo purposes
+        # NIR and RED are placeholders for actual satellite band values
+        NIR = np.random.random()  # Placeholder for actual NIR band value
+        RED = np.random.random()  # Placeholder for actual Red band value
+        
+        ndvi_value = (NIR - RED) / (NIR + RED)
+        ndvi_result = f"NDVI calculated: {ndvi_value:.4f}"
+
+        # Generate a dummy NDVI image (for demo purposes)
+        fig, ax = plt.subplots()
+        ax.imshow(np.random.rand(10, 10), cmap='RdYlGn')  # Placeholder image
+        ax.set_title(f"NDVI: {ndvi_value:.4f}")
+
+        # Save the NDVI image to the static folder
+        ndvi_image_path = 'ndvi_example_image.png'
+        image_path = os.path.join(app.config['UPLOAD_FOLDER'], ndvi_image_path)
+        fig.savefig(image_path)
+        plt.close(fig)
+
+        return render_template('ndvi.html', ndvi_result=ndvi_result, ndvi_image_path=ndvi_image_path)
+
+    return render_template('ndvi.html', ndvi_result=None, ndvi_image_path=None)
+
 @app.route('/predict_plant', methods=['GET', 'POST'])
 def predict_plant():
-    result = suggestion = ''
-    
     if request.method == 'POST':
-        file = request.files['image']
-        if file:
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-            file.save(filepath)
-            result, suggestion = predict_image(filepath)
+        # Handle image upload
+        image_file = request.files['image']
+        if image_file:
+            filename = secure_filename(image_file.filename)
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            image_file.save(filepath)
 
-    return render_template('predict_plant.html', result=result, suggestion=suggestion)
+            # Preprocess image for disease prediction
+            img = Image.open(filepath).resize((256, 256))
+            img_array = np.array(img) / 255.0
+            img_array = np.expand_dims(img_array, axis=0)
+
+            # Predict using the disease model
+            pred = disease_model.predict(img_array)
+            pred_class = np.argmax(pred)
+
+            # Map the class to a label (e.g., mapping numeric predictions to disease names)
+            ref = {
+                0: 'Pepper__bell___Bacterial_spot', 
+                1: 'Pepper__bell___healthy', 
+                2: 'Potato___Early_blight', 
+                3: 'Potato___Late_blight', 
+                4: 'Potato___healthy', 
+                5: 'Tomato_Bacterial_spot', 
+                6: 'Tomato_Early_blight', 
+                7: 'Tomato_Late_blight', 
+                8: 'Tomato_Leaf_Mold', 
+                9: 'Tomato_Septoria_leaf_spot', 
+                10: 'Tomato_Spider_mites_Two_spotted_spider_mite', 
+                11: 'Tomato__Target_Spot', 
+                12: 'Tomato__Tomato_YellowLeaf__Curl_Virus', 
+                13: 'Tomato__Tomato_mosaic_virus', 
+                14: 'Tomato_healthy'
+            }
+            
+            # Get the disease label based on the predicted class
+            disease_prediction = ref.get(pred_class, 'Unknown Disease')
+
+            # Disease Treatment Suggestions (mapped to diseases)
+            treatment_suggestions = {
+                'Pepper__bell___Bacterial_spot': "Apply bactericides and remove infected leaves.",
+                'Pepper__bell___healthy': "No treatment needed. Keep the plant healthy with proper care.",
+                'Potato___Early_blight': "Use fungicides and remove affected leaves.",
+                'Potato___Late_blight': "Spray fungicides and remove infected plant parts.",
+                'Potato___healthy': "No treatment required. Ensure well-draining soil.",
+                'Tomato_Bacterial_spot': "Use copper-based fungicides and prune affected areas.",
+                'Tomato_Early_blight': "Apply fungicide and remove damaged leaves.",
+                'Tomato_Late_blight': "Spray fungicides and discard infected plant material.",
+                'Tomato_Leaf_Mold': "Increase airflow and use fungicides to prevent further spread.",
+                'Tomato_Septoria_leaf_spot': "Remove infected leaves and apply appropriate fungicides.",
+                'Tomato_Spider_mites_Two_spotted_spider_mite': "Use insecticides or natural predators to control spider mites.",
+                'Tomato__Target_Spot': "Apply fungicide and remove affected leaves.",
+                'Tomato__Tomato_YellowLeaf__Curl_Virus': "No cure, but you can control vector spread using insecticides.",
+                'Tomato__Tomato_mosaic_virus': "No cure. Remove infected plants to prevent virus spread.",
+                'Tomato_healthy': "No treatment required. Keep the plant healthy with balanced care."
+            }
+
+            # Get the treatment suggestion based on the predicted disease
+            treatment_suggestion = treatment_suggestions.get(disease_prediction, "Unknown treatment. Consult a specialist.")
+
+            # Return the result with disease prediction and treatment suggestion
+            return render_template('predict_plant.html', result=disease_prediction, suggestion=treatment_suggestion)
+    
+    return render_template('predict_plant.html', result=None, suggestion=None)
 
 @app.route('/recommend_crop', methods=['GET', 'POST'])
-def recommend_crop_route():
-    crop_result = ''
-    
+def recommend_crop():
     if request.method == 'POST':
-        try:
-            # Collecting all the form data
-            nitrogen = request.form.get('N')
-            phosphorus = request.form.get('P')
-            potassium = request.form.get('K')
-            temperature = request.form.get('temperature')
-            humidity = request.form.get('humidity')
-            ph = request.form.get('ph')
-            rainfall = request.form.get('rainfall')
+        # Extract form data
+        N = float(request.form['N'])
+        P = float(request.form['P'])
+        K = float(request.form['K'])
+        temperature = float(request.form['temperature'])
+        humidity = float(request.form['humidity'])
+        ph = float(request.form['ph'])
+        rainfall = float(request.form['rainfall'])
 
-            # Validate the form fields to make sure they're all filled out
-            if not all([nitrogen, phosphorus, potassium, temperature, humidity, ph, rainfall]):
-                crop_result = "Error: All fields are required!"
-            else:
-                # Convert the inputs to floats (if they're valid)
-                soil_data = [
-                    float(nitrogen),
-                    float(phosphorus),
-                    float(potassium),
-                    float(temperature),
-                    float(humidity),
-                    float(ph),
-                    float(rainfall)
-                ]
-                
-                # Call the crop recommendation function
-                crop_result = recommend_crop(soil_data)
-                
-        except Exception as e:
-            crop_result = f"Error processing crop recommendation: {e}"
+        # Prepare input features for crop recommendation
+        input_features = [N, P, K, temperature, humidity, ph, rainfall]
 
-    return render_template('recommend_crop.html', crop_result=crop_result)
+        # Get crop recommendation from model
+        recommended_crop = crop_model.predict([input_features])[0]
 
+        return render_template('recommend_crop.html', crop_result=recommended_crop)
 
-@app.route('/ndvi', methods=['GET', 'POST'])
-def ndvi_route():
-    ndvi_result = ''
-    
-    if request.method == 'POST':
-        try:
-            # Collect bounding box (bbox) and time range from form
-            lon_min = float(request.form.get('lon_min'))
-            lat_min = float(request.form.get('lat_min'))
-            lon_max = float(request.form.get('lon_max'))
-            lat_max = float(request.form.get('lat_max'))
-            time_range = request.form.get('time_range')
-
-            # Process the NDVI (make sure process_ndvi is properly defined in your app)
-            ndvi_result = process_ndvi([lon_min, lat_min, lon_max, lat_max], time_range)
-        
-        except Exception as e:
-            ndvi_result = f"Error processing NDVI data: {e}"
-
-    return render_template('ndvi.html', ndvi_result=ndvi_result)
-
-
+    return render_template('recommend_crop.html', crop_result=None)
 
 if __name__ == '__main__':
     app.run(debug=True)

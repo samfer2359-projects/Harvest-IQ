@@ -24,8 +24,15 @@
 
         {% if ndvi_result %}
         <div class="result-box">
-            <h3>NDVI Result:</h3>
-            <textarea rows="10" readonly>{{ ndvi_result }}</textarea>
+            <h3>NDVI Calculation Result:</h3>
+            <p>{{ ndvi_result }}</p>
+            
+            {% if ndvi_image_path %}
+                <div class="ndvi-image">
+                    <h4>NDVI Visualization</h4>
+                    <img src="{{ url_for('static', filename=ndvi_image_path) }}" alt="NDVI Image">
+                </div>
+            {% endif %}
         </div>
         {% endif %}
     </div>

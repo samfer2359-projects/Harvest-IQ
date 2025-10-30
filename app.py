@@ -67,69 +67,109 @@ def ndvi():
 def predict_plant():
     if request.method == 'POST':
         # Handle image upload
-        image_file = request.files['image']
-        if image_file:
-            filename = secure_filename(image_file.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            image_file.save(filepath)
+        image_file = request.files.get('image')
+        if not image_file or image_file.filename == '':
+            return render_template('predict_plant.html', result=None, suggestion=None, error="No file uploaded.")
 
-            # Preprocess image for disease prediction
-            img = Image.open(filepath).resize((256, 256))
-            img_array = np.array(img) / 255.0
-            img_array = np.expand_dims(img_array, axis=0)
+        filename = secure_filename(image_file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        image_file.save(filepath)
 
-            # Predict using the disease model
-            pred = disease_model.predict(img_array)
-            pred_class = np.argmax(pred)
+        # --- Preprocess image for VGG19 ---
+        try:
+            img = Image.open(filepath)
+            # Convert to RGB (handles grayscale / RGBA)
+            if img.mode != 'RGB':
+                img = img.convert('RGB')
+            img = img.resize((256, 256))   # Model expects 256x256 input size
 
-            # Map the class to a label (e.g., mapping numeric predictions to disease names)
-            ref = {
-                0: 'Pepper__bell___Bacterial_spot', 
-                1: 'Pepper__bell___healthy', 
-                2: 'Potato___Early_blight', 
-                3: 'Potato___Late_blight', 
-                4: 'Potato___healthy', 
-                5: 'Tomato_Bacterial_spot', 
-                6: 'Tomato_Early_blight', 
-                7: 'Tomato_Late_blight', 
-                8: 'Tomato_Leaf_Mold', 
-                9: 'Tomato_Septoria_leaf_spot', 
-                10: 'Tomato_Spider_mites_Two_spotted_spider_mite', 
-                11: 'Tomato__Target_Spot', 
-                12: 'Tomato__Tomato_YellowLeaf__Curl_Virus', 
-                13: 'Tomato__Tomato_mosaic_virus', 
-                14: 'Tomato_healthy'
-            }
-            
-            # Get the disease label based on the predicted class
-            disease_prediction = ref.get(pred_class, 'Unknown Disease')
+            img_array = np.array(img).astype('float32')
+        except Exception as e:
+            return render_template('predict_plant.html', result=None, suggestion=None, error=f"Image processing error: {e}")
 
-            # Disease Treatment Suggestions (mapped to diseases)
-            treatment_suggestions = {
-                'Pepper__bell___Bacterial_spot': "Apply bactericides and remove infected leaves.",
-                'Pepper__bell___healthy': "No treatment needed. Keep the plant healthy with proper care.",
-                'Potato___Early_blight': "Use fungicides and remove affected leaves.",
-                'Potato___Late_blight': "Spray fungicides and remove infected plant parts.",
-                'Potato___healthy': "No treatment required. Ensure well-draining soil.",
-                'Tomato_Bacterial_spot': "Use copper-based fungicides and prune affected areas.",
-                'Tomato_Early_blight': "Apply fungicide and remove damaged leaves.",
-                'Tomato_Late_blight': "Spray fungicides and discard infected plant material.",
-                'Tomato_Leaf_Mold': "Increase airflow and use fungicides to prevent further spread.",
-                'Tomato_Septoria_leaf_spot': "Remove infected leaves and apply appropriate fungicides.",
-                'Tomato_Spider_mites_Two_spotted_spider_mite': "Use insecticides or natural predators to control spider mites.",
-                'Tomato__Target_Spot': "Apply fungicide and remove affected leaves.",
-                'Tomato__Tomato_YellowLeaf__Curl_Virus': "No cure, but you can control vector spread using insecticides.",
-                'Tomato__Tomato_mosaic_virus': "No cure. Remove infected plants to prevent virus spread.",
-                'Tomato_healthy': "No treatment required. Keep the plant healthy with balanced care."
-            }
+        # Expand dims and apply VGG19 preprocessing
+        img_array = np.expand_dims(img_array, axis=0)
+        try:
+            from tensorflow.keras.applications.vgg19 import preprocess_input
+        except Exception:
+            # fallback if import path differs
+            from tensorflow.keras.applications.vgg19 import preprocess_input
 
-            # Get the treatment suggestion based on the predicted disease
-            treatment_suggestion = treatment_suggestions.get(disease_prediction, "Unknown treatment. Consult a specialist.")
+        img_array = preprocess_input(img_array)  # important for VGG19
 
-            # Return the result with disease prediction and treatment suggestion
-            return render_template('predict_plant.html', result=disease_prediction, suggestion=treatment_suggestion)
-    
+        # Predict using the disease model
+        preds = disease_model.predict(img_array)
+
+        # Convert to probabilities (in case model returns logits)
+        try:
+            probs = tf.nn.softmax(preds[0]).numpy()
+        except Exception:
+            # if preds is already probabilities or single-dim
+            probs = np.array(preds[0])
+            # normalize as a safeguard
+            probs = probs / (probs.sum() + 1e-12)
+
+        # Get top prediction(s)
+        top_idx = int(np.argmax(probs))
+        top_prob = float(probs[top_idx])
+
+        # Map the class to a label (ensure mapping covers indices)
+        ref = {
+            0: 'Pepper__bell___Bacterial_spot',
+            1: 'Pepper__bell___healthy',
+            2: 'Potato___Early_blight',
+            3: 'Potato___Late_blight',
+            4: 'Potato___healthy',
+            5: 'Tomato_Bacterial_spot',
+            6: 'Tomato_Early_blight',
+            7: 'Tomato_Late_blight',
+            8: 'Tomato_Leaf_Mold',
+            9: 'Tomato_Septoria_leaf_spot',
+            10: 'Tomato_Spider_mites_Two_spotted_spider_mite',
+            11: 'Tomato__Target_Spot',
+            12: 'Tomato__Tomato_YellowLeaf__Curl_Virus',
+            13: 'Tomato__Tomato_mosaic_virus',
+            14: 'Tomato_healthy'
+        }
+
+        disease_prediction = ref.get(top_idx, 'Unknown Disease')
+
+        # Disease Treatment Suggestions (same mapping)
+        treatment_suggestions = {
+            'Pepper__bell___Bacterial_spot': "Apply bactericides and remove infected leaves.",
+            'Pepper__bell___healthy': "No treatment needed. Keep the plant healthy with proper care.",
+            'Potato___Early_blight': "Use fungicides and remove affected leaves.",
+            'Potato___Late_blight': "Spray fungicides and remove infected plant parts.",
+            'Potato___healthy': "No treatment required. Ensure well-draining soil.",
+            'Tomato_Bacterial_spot': "Use copper-based fungicides and prune affected areas.",
+            'Tomato_Early_blight': "Apply fungicide and remove damaged leaves.",
+            'Tomato_Late_blight': "Spray fungicides and discard infected plant material.",
+            'Tomato_Leaf_Mold': "Increase airflow and use fungicides to prevent further spread.",
+            'Tomato_Septoria_leaf_spot': "Remove infected leaves and apply appropriate fungicides.",
+            'Tomato_Spider_mites_Two_spotted_spider_mite': "Use insecticides or natural predators to control spider mites.",
+            'Tomato__Target_Spot': "Apply fungicide and remove affected leaves.",
+            'Tomato__Tomato_YellowLeaf__Curl_Virus': "No cure, but you can control vector spread using insecticides.",
+            'Tomato__Tomato_mosaic_virus': "No cure. Remove infected plants to prevent virus spread.",
+            'Tomato_healthy': "No treatment required. Keep the plant healthy with balanced care."
+        }
+
+        treatment_suggestion = treatment_suggestions.get(disease_prediction, "Unknown treatment. Consult a specialist.")
+
+        # Also prepare top-3 suggestions for debugging / display if desired
+        top3_idx = np.argsort(probs)[-3:][::-1]
+        top3 = [(int(i), ref.get(int(i), 'Unknown'), float(probs[int(i)])) for i in top3_idx]
+
+        # Pass prediction, confidence and optionally the top-3 to the template
+        return render_template(
+            'predict_plant.html',
+            result=disease_prediction,
+            suggestion=treatment_suggestion,
+            confidence=f"{top_prob*100:.2f}%",
+            top3=top3
+        )
+
     return render_template('predict_plant.html', result=None, suggestion=None)
+
 
 @app.route('/recommend_crop', methods=['GET', 'POST'])
 def recommend_crop():

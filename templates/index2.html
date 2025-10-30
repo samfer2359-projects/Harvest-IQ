@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Intelligence System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+    <header>
+        <h1>HARVEST IQ</h1>
+        <p>Explore the different features below:</p>
+    </header>
+
+    <div class="card-container">
+        <div class="card">
+            <img src="https://via.placeholder.com/150" alt="Plant Disease Prediction">
+            <h3>Plant Disease Prediction</h3>
+            <p>Upload a plant image to predict diseases and get treatment suggestions.</p>
+            <a href="/predict_plant" class="btn">Go to Plant Disease Prediction</a>
+        </div>
+
+        <div class="card">
+            <img src="https://via.placeholder.com/150" alt="Crop Recommendation">
+            <h3>Crop Recommendation</h3>
+            <p>Get crop recommendations based on soil conditions and weather.</p>
+            <a href="/recommend_crop" class="btn">Go to Crop Recommendation</a>
+        </div>
+
+        <div class="card">
+            <img src="https://via.placeholder.com/150" alt="NDVI Calculation">
+            <h3>NDVI Calculation</h3>
+            <p>Calculate NDVI for a given area to assess vegetation health.</p>
+            <a href="/ndvi" class="btn">Go to NDVI Calculation</a>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Harvest IQ</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #e6f4ea;
+      color: #2f4f2f;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #a8d5ba;
+      color: white;
+      text-align: center;
+      padding: 20px 0;
+      font-size: 1.8em;
+      font-weight: bold;
+    }
+    main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 80vh;
+    }
+    .card {
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 300px;
+    }
+    input[type="text"], input[type="password"] {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    footer {
+      text-align: center;
+      padding: 10px;
+      background-color: #a8d5ba;
+      color: white;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+    a {
+      color: #2f4f2f;
+      text-decoration: none;
+      margin-top: 15px;
+      display: inline-block;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <header>Harvest IQ Login</header>
+  <main>
+    <div class="card">
+      <h2>Login</h2>
+      <form action="/login" method="POST">
+        <input id="username" name="username" type="text" placeholder="Enter your name" required><br>
+        <input name="password" type="password" placeholder="Password" required><br>
+        <button type="submit">Login</button>
+      </form>
+      
+      <a href="index.html">Back to Home</a>
+    </div>
+  </main>
+  <footer>
+    © 2025 Harvest IQ - College Project by Neha Jaiswal
+  </footer>
+
+  
+</body>
+</html>

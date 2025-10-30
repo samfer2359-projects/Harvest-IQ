@@ -63,6 +63,23 @@ def ndvi():
 
     return render_template('ndvi.html', ndvi_result=None, ndvi_image_path=None)
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        if username and password == '1234':  # simple demo check
+            return redirect(url_for('welcome', username=username))
+        else:
+            return render_template('login.html', error="Invalid username or password")
+
+    return render_template('login.html')
+
+@app.route('/welcome/<username>')
+def welcome(username):
+    return render_template('welcome.html', username=username)
+
 @app.route('/predict_plant', methods=['GET', 'POST'])
 def predict_plant():
     if request.method == 'POST':

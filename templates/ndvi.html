@@ -22,25 +22,20 @@
             <input type="submit" value="Calculate NDVI">
         </form>
 
-        {% if ndvi_result %}
-        <div class="result-box">
-            <h3>NDVI Calculation Result:</h3>
-            <p>{{ ndvi_result }}</p>
-            
+        <div>
             {% if ndvi_image_path %}
-                <div class="ndvi-image">
-                    <h4>NDVI Visualization</h4>
-                    <!-- <img src="{{ url_for('static', filename=ndvi_image_path) }}" alt="NDVI Image">  -->
-                    <!-- Display NDVI plot -->
-                    <img src="{{ url_for('static', filename='ndvi_output/ndvi_plot.png') }}" alt="NDVI Plot">
-
-                    <!-- Provide link to download NDVI NetCDF file -->
-                    <a href="{{ url_for('static', filename='ndvi_output/ndvi_output.nc') }}" download>Download NDVI NetCDF File</a>
-
-                </div>
+                {% if ndvi_result %}
+                    <p>{{ ndvi_result }}</p>
+                    <!-- Reference the plot image saved in the static/ndvi_output/ folder -->
+                    <img src="{{ url_for('static', filename='ndvi_output/ndvi_plot.png') }}" alt="NDVI Plot" width="500">
+                    <br>
+                    <div>
+                        <!-- Link to download the NDVI NetCDF file saved in the static/ndvi_output/ folder -->
+                        <a href="{{ url_for('static', filename='ndvi_output/ndvi_output.nc') }}" download>Download NDVI NetCDF File</a>
+                    </div>
+                {% endif %}
             {% endif %}
         </div>
-        {% endif %}
     </div>
 
     <a href="/" class="btn">Back to Home</a>

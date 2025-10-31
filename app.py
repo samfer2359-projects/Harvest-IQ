@@ -34,22 +34,24 @@ def index():
 
 
 
-import main_sat
+import main_sat  # Import your script that computes NDVI
+
 @app.route('/ndvi', methods=['GET', 'POST'])
 def ndvi():
     if request.method == 'POST':
-        # Call main_sat script to generate NDVI and get paths
         try:
-            ndvi_paths = main_sat.get_ndvi_paths()
+            # Call your main_sat logic to get NDVI paths
+            ndvi_paths = main_sat.get_ndvi_paths()  # This should return a dictionary with paths
 
-            # Return the template with NDVI plot and NetCDF file paths
-            return render_template('ndvi.html',
-                                   ndvi_result="NDVI calculation complete!",
-                                   ndvi_image_path=ndvi_paths["ndvi_plot"],
-                                   ndvi_netcdf_path=ndvi_paths["ndvi_netcdf"])
-
+            # Render the template with paths to the NDVI plot and NetCDF file
+            return render_template(
+                'ndvi.html',
+                ndvi_result="✅ NDVI calculation complete!",
+                ndvi_image_path=ndvi_paths["ndvi_plot"],  # Path to NDVI plot
+                ndvi_netcdf_path=ndvi_paths["ndvi_netcdf"]  # Path to NDVI NetCDF
+            )
         except Exception as e:
-            return f"Error processing the NDVI: {e}", 500
+            return f"Error processing NDVI: {e}", 500
 
     return render_template('ndvi.html')
 

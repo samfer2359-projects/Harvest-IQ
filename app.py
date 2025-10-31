@@ -11,6 +11,7 @@ import pandas as pd
 import matplotlib.pyplot as plt  # <-- Add this import for plotting
 import xarray as xr
 
+import main_sat  # Ensure this import is here
 
 
 app = Flask(__name__)
@@ -44,8 +45,18 @@ import main_sat  # Import your script that computes NDVI
 def ndvi():
     if request.method == 'POST':
         try:
-            # Call your main_sat logic to get NDVI paths
-            ndvi_paths = main_sat.get_ndvi_paths()  # This should return a dictionary with paths
+            # Get values from the form submission
+            lon_min = float(request.form['lon_min'])
+            lat_min = float(request.form['lat_min'])
+            lon_max = float(request.form['lon_max'])
+            lat_max = float(request.form['lat_max'])
+            time_range = request.form['time_range']
+
+            # Call the NDVI calculation logic from `main_sat.py`
+            ndvi_paths = main_sat.get_ndvi_paths(
+                [lon_min, lat_min, lon_max, lat_max],  # Bounding box
+                time_range  # Time range
+            )
 
             # Render the template with paths to the NDVI plot and NetCDF file
             return render_template(

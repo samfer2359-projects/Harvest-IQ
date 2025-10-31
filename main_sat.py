@@ -2,89 +2,102 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import xarray as xr
+from pystac_client import Client
+import planetary_computer
+import stackstac
 
-# Set Matplotlib backend to Agg (suitable for non-GUI environments)
-import matplotlib
-matplotlib.use('Agg')
+def compute_ndvi(bbox, datetime):
+    """
+    Compute NDVI using Sentinel-2 data based on the provided bounding box and time range.
+    This function does not retrain any model, it simply computes NDVI using the provided data.
 
-def get_ndvi_paths():
+    :param bbox: List of bounding box coordinates [lon_min, lat_min, lon_max, lat_max]
+    :param datetime: Time range string (e.g., "2025-01-01/2025-01-10")
+    :return: xarray.DataArray containing the computed NDVI values
     """
-    Main function to calculate NDVI, generate the plot, and save the data as NetCDF.
+    # Connect to Planetary Computer STAC catalog
+    catalog = Client.open("https://planetarycomputer.microsoft.com/api/stac/v1")
+
+    # Search for Sentinel-2 L2A images with low cloud cover
+    search = catalog.search(
+        collections=["sentinel-2-l2a"],
+        bbox=bbox,
+        datetime=datetime,
+        query={"eo:cloud_cover": {"lt": 10}}  # Low cloud cover
+    )
+
+    # Retrieve the search results
+    items = list(search.get_items())
+    if len(items) == 0:
+        raise ValueError("No Sentinel-2 images found for the given area/time range.")
+
+    # Sign items to authorize asset access via Planetary Computer
+    signed_items = [planetary_computer.sign(item) for item in items]
+
+    # Stack Red (B04) and NIR (B08) bands from the signed items
+    ds = stackstac.stack(
+        signed_items,
+        assets=["B04", "B08"],
+        bounds_latlon=bbox,
+        epsg=4326,
+        resolution=0.00025
+    )
+
+    # Convert to xarray dataset and extract Red and NIR bands
+    ds = ds.to_dataset("band")
+    red = ds["B04"]
+    nir = ds["B08"]
+
+    # Check the coordinates and rename to 'latitude' and 'longitude' if necessary
+    coords = list(ds.coords)
+    if 'lat' in coords and 'lon' in coords:
+        ds = ds.rename({"lat": "latitude", "lon": "longitude"})
+    elif 'latitude' in coords and 'longitude' in coords:
+        pass  # Already correct, do nothing
+    else:
+        raise ValueError("The dataset does not contain 'lat' or 'longitude' dimensions")
+
+    # Compute NDVI
+    ndvi = (nir - red) / (nir + red)
+    
+    # Take the median of NDVI over time (this reduces the time dimension)
+    ndvi_median = ndvi.median(dim="time")
+
+    return ndvi_median
+
+def get_ndvi_paths(bbox, datetime):
     """
-    # Ensure output directory exists
+    Computes NDVI, saves a plot and NetCDF file, and returns their paths.
+    This function uses the computed NDVI data and saves it as both an image and NetCDF file.
+
+    :param bbox: List of bounding box coordinates [lon_min, lat_min, lon_max, lat_max]
+    :param datetime: Time range string (e.g., "2025-01-01/2025-01-10")
+    :return: Dictionary with file paths for the NDVI plot image and NetCDF file
+    """
+    # Ensure the output directory exists
     output_dir = 'static/ndvi_output'
     os.makedirs(output_dir, exist_ok=True)
 
-    # Step 1: Compute NDVI data
-    ndvi_data = compute_ndvi_somehow()  # Replace with your actual NDVI computation logic
+    # Compute NDVI data using the given bounding box and time range
+    ndvi = compute_ndvi(bbox, datetime)
 
-    # Step 2: Plot and save the NDVI image
+    # Save NDVI plot as an image
     plot_path = os.path.join(output_dir, 'ndvi_plot.png')
-    save_ndvi_plot(ndvi_data, plot_path)
-
-    # Step 3: Save the NDVI data to a NetCDF file
-    netcdf_path = os.path.join(output_dir, 'ndvi_output.nc')
-    save_ndvi_to_netcdf(ndvi_data, netcdf_path)
-
-    # Return paths to the generated plot and NetCDF file
-    return {
-        "ndvi_plot": plot_path,  # Path to the NDVI plot image
-        "ndvi_netcdf": netcdf_path  # Path to the NDVI NetCDF file
-    }
-
-
-def compute_ndvi_somehow():
-    """
-    Compute the NDVI (Normalized Difference Vegetation Index) using satellite data or sample logic.
-    This function should be replaced with actual NDVI computation logic using appropriate data.
-
-    Returns:
-        np.ndarray: A 2D numpy array representing the NDVI values.
-    """
-    # Example: Generate random NDVI data (replace with actual NDVI computation)
-    ndvi_data = np.random.rand(100, 100)  # Random data for illustration purposes
-    return ndvi_data
-
-
-def save_ndvi_plot(ndvi_data, plot_path):
-    """
-    Save the NDVI plot to a file as a PNG image.
-
-    Args:
-        ndvi_data (np.ndarray): 2D array of NDVI values.
-        plot_path (str): Path where the NDVI plot image will be saved.
-    """
     plt.figure(figsize=(8, 6))
-
-    # Use imshow for 2D array visualization with colormap
-    im = plt.imshow(ndvi_data, cmap='YlGn')  # 'YlGn' colormap (Green shades for NDVI)
-    plt.colorbar(im)  # Optional: Add a colorbar to show NDVI scale
+    ndvi.plot(cmap='YlGn')  # Use a green-yellow colormap for NDVI
     plt.title("NDVI Plot")
-    
-    # Save the plot
-    plt.savefig(plot_path)
-    plt.close()  # Close the plot to free resources
+    plt.xlabel("Longitude")
+    plt.ylabel("Latitude")
+    plt.savefig(plot_path, bbox_inches='tight')
+    plt.close()
 
+    # Save NDVI data to NetCDF file (excluding unnecessary metadata)
+    netcdf_path = os.path.join(output_dir, 'ndvi_output.nc')
+    # Save without including extra attributes that might cause issues
+    ndvi.to_netcdf(netcdf_path, encoding={'latitude': {'dtype': 'float32'}, 'longitude': {'dtype': 'float32'}})
 
-def save_ndvi_to_netcdf(ndvi_data, netcdf_path):
-    """
-    Save the NDVI data to a NetCDF file.
-
-    Args:
-        ndvi_data (np.ndarray): 2D array of NDVI values.
-        netcdf_path (str): Path where the NetCDF file will be saved.
-    """
-    # Convert the NDVI data into an xarray.DataArray
-    ndvi_xr = xr.DataArray(ndvi_data, dims=["lat", "lon"], 
-                            coords={"lat": np.arange(ndvi_data.shape[0]), 
-                                    "lon": np.arange(ndvi_data.shape[1])})
-
-    # Save the NDVI DataArray to a NetCDF file
-    ndvi_xr.to_netcdf(netcdf_path)
-
-
-# Main entry point when running the script
-if __name__ == "__main__":
-    ndvi_paths = get_ndvi_paths()
-    print(f"NDVI plot saved at: {ndvi_paths['ndvi_plot']}")
-    print(f"NDVI data saved in NetCDF format at: {ndvi_paths['ndvi_netcdf']}")
+    # Return the paths to the plot and NetCDF file
+    return {
+        "ndvi_plot": plot_path,      # Path to NDVI plot image
+        "ndvi_netcdf": netcdf_path   # Path to NDVI NetCDF file
+    }

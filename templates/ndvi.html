@@ -30,7 +30,13 @@
             {% if ndvi_image_path %}
                 <div class="ndvi-image">
                     <h4>NDVI Visualization</h4>
-                    <img src="{{ url_for('static', filename=ndvi_image_path) }}" alt="NDVI Image">
+                    <!-- <img src="{{ url_for('static', filename=ndvi_image_path) }}" alt="NDVI Image">  -->
+                    <!-- Display NDVI plot -->
+                    <img src="{{ url_for('static', filename='ndvi_output/ndvi_plot.png') }}" alt="NDVI Plot">
+
+                    <!-- Provide link to download NDVI NetCDF file -->
+                    <a href="{{ url_for('static', filename='ndvi_output/ndvi_output.nc') }}" download>Download NDVI NetCDF File</a>
+
                 </div>
             {% endif %}
         </div>

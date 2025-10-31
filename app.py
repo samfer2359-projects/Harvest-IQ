@@ -9,6 +9,8 @@ import tensorflow as tf
 from werkzeug.utils import secure_filename
 import pandas as pd
 import matplotlib.pyplot as plt  # <-- Add this import for plotting
+import xarray as xr
+
 
 app = Flask(__name__)
 
@@ -25,43 +27,36 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # Ensure the upload folder exists
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+#Home Route
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', result='', suggestion='')
 
+
+
+import main_sat
 @app.route('/ndvi', methods=['GET', 'POST'])
 def ndvi():
     if request.method == 'POST':
-        # Extract form data
-        lon_min = float(request.form['lon_min'])
-        lat_min = float(request.form['lat_min'])
-        lon_max = float(request.form['lon_max'])
-        lat_max = float(request.form['lat_max'])
-        time_range = request.form['time_range']
+        # Call main_sat script to generate NDVI and get paths
+        try:
+            ndvi_paths = main_sat.get_ndvi_paths()
 
-        # NDVI calculation - Placeholder logic (use actual NDVI calculation in practice)
-        # Example: NDVI = (NIR - RED) / (NIR + RED), just for demo purposes
-        # NIR and RED are placeholders for actual satellite band values
-        NIR = np.random.random()  # Placeholder for actual NIR band value
-        RED = np.random.random()  # Placeholder for actual Red band value
-        
-        ndvi_value = (NIR - RED) / (NIR + RED)
-        ndvi_result = f"NDVI calculated: {ndvi_value:.4f}"
+            # Return the template with NDVI plot and NetCDF file paths
+            return render_template('ndvi.html',
+                                   ndvi_result="NDVI calculation complete!",
+                                   ndvi_image_path=ndvi_paths["ndvi_plot"],
+                                   ndvi_netcdf_path=ndvi_paths["ndvi_netcdf"])
 
-        # Generate a dummy NDVI image (for demo purposes)
-        fig, ax = plt.subplots()
-        ax.imshow(np.random.rand(10, 10), cmap='RdYlGn')  # Placeholder image
-        ax.set_title(f"NDVI: {ndvi_value:.4f}")
+        except Exception as e:
+            return f"Error processing the NDVI: {e}", 500
 
-        # Save the NDVI image to the static folder
-        ndvi_image_path = 'ndvi_example_image.png'
-        image_path = os.path.join(app.config['UPLOAD_FOLDER'], ndvi_image_path)
-        fig.savefig(image_path)
-        plt.close(fig)
+    return render_template('ndvi.html')
 
-        return render_template('ndvi.html', ndvi_result=ndvi_result, ndvi_image_path=ndvi_image_path)
 
-    return render_template('ndvi.html', ndvi_result=None, ndvi_image_path=None)
+
+
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -104,10 +99,8 @@ def predict_plant():
         except Exception as e:
             return render_template('predict_plant.html', result=None, suggestion=None, error=f"Image processing error: {e}")
 
-<<<<<<< HEAD
             #Treatment suggestions dictionary
             
-=======
         # Expand dims and apply VGG19 preprocessing
         img_array = np.expand_dims(img_array, axis=0)
         try:
@@ -115,7 +108,6 @@ def predict_plant():
         except Exception:
             # fallback if import path differs
             from tensorflow.keras.applications.vgg19 import preprocess_input
->>>>>>> 4e6d7ddcc13370e76518593397933e5c76717749
 
         img_array = preprocess_input(img_array)  # important for VGG19
 
@@ -216,4 +208,4 @@ def recommend_crop():
     return render_template('recommend_crop.html', crop_result=None)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)

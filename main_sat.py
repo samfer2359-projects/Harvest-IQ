@@ -26,12 +26,11 @@ def compute_ndvi(bbox, datetime):
         query={"eo:cloud_cover": {"lt": 10}}  # Low cloud cover
     )
 
-    # Retrieve the search results
     items = list(search.get_items())
     if len(items) == 0:
         raise ValueError("No Sentinel-2 images found for the given area/time range.")
 
-    # Sign items to authorize asset access via Planetary Computer
+    # ✅ Sign items to authorize asset access via Planetary Computer
     signed_items = [planetary_computer.sign(item) for item in items]
 
     # Stack Red (B04) and NIR (B08) bands from the signed items
@@ -43,24 +42,27 @@ def compute_ndvi(bbox, datetime):
         resolution=0.00025
     )
 
-    # Convert to xarray dataset and extract Red and NIR bands
+    # Debug: Print out the dataset dimensions to understand its structure
+    print("Dataset dimensions:", ds.dims)
+
+    # If the dataset does not contain 'lat' or 'lon', rename the dimensions
+    if 'latitude' in ds.dims and 'longitude' in ds.dims:
+        ds = ds.rename({"latitude": "lat", "longitude": "lon"})
+    elif 'y' in ds.dims and 'x' in ds.dims:
+        ds = ds.rename({"y": "lat", "x": "lon"})
+
+    # Convert to dataset and extract Red and NIR bands
     ds = ds.to_dataset("band")
     red = ds["B04"]
     nir = ds["B08"]
 
-    # Check the coordinates and rename to 'latitude' and 'longitude' if necessary
-    coords = list(ds.coords)
-    if 'lat' in coords and 'lon' in coords:
-        ds = ds.rename({"lat": "latitude", "lon": "longitude"})
-    elif 'latitude' in coords and 'longitude' in coords:
-        pass  # Already correct, do nothing
-    else:
-        raise ValueError("The dataset does not contain 'lat' or 'longitude' dimensions")
+    # Remove any non-data variables (e.g., projection or shape metadata)
+    ds = ds.drop_vars(['proj:shape', 'proj:transform', 'spatial_ref'], errors='ignore')
 
     # Compute NDVI
     ndvi = (nir - red) / (nir + red)
     
-    # Take the median of NDVI over time (this reduces the time dimension)
+    # Take the median of NDVI over time
     ndvi_median = ndvi.median(dim="time")
 
     return ndvi_median
@@ -74,7 +76,7 @@ def get_ndvi_paths(bbox, datetime):
     :param datetime: Time range string (e.g., "2025-01-01/2025-01-10")
     :return: Dictionary with file paths for the NDVI plot image and NetCDF file
     """
-    # Ensure the output directory exists
+    # Ensure output directory exists
     output_dir = 'static/ndvi_output'
     os.makedirs(output_dir, exist_ok=True)
 
@@ -91,10 +93,9 @@ def get_ndvi_paths(bbox, datetime):
     plt.savefig(plot_path, bbox_inches='tight')
     plt.close()
 
-    # Save NDVI data to NetCDF file (excluding unnecessary metadata)
+    # Save NDVI data to NetCDF file
     netcdf_path = os.path.join(output_dir, 'ndvi_output.nc')
-    # Save without including extra attributes that might cause issues
-    ndvi.to_netcdf(netcdf_path, encoding={'latitude': {'dtype': 'float32'}, 'longitude': {'dtype': 'float32'}})
+    ndvi.to_netcdf(netcdf_path)
 
     # Return the paths to the plot and NetCDF file
     return {

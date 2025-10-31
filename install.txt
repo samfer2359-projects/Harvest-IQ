@@ -2,3 +2,11 @@ pip install netCDF4 h5netcdf
 
 pip install pystac-client planetary-computer stackstac xarray matplotlib
 
+------------------------------
+
+pip install geopandas
+
+pip install flask flask_sqlalchemy keras tensorflow scikit-learn
+
+
+

@@ -66,9 +66,11 @@ def ndvi():
                 ndvi_netcdf_path=ndvi_paths["ndvi_netcdf"]  # Path to NDVI NetCDF
             )
         except Exception as e:
-            return f"Error processing NDVI: {e}", 500
+            # Handle and display specific error messages
+            return f"Error processing NDVI: {str(e)}", 500
 
     return render_template('ndvi.html')
+
 
 
 

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session 
 import os
 import joblib
 import numpy as np
@@ -12,7 +12,11 @@ import matplotlib.pyplot as plt  # <-- Add this import for plotting
 import xarray as xr
 
 
+
 app = Flask(__name__)
+
+import secrets
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', secrets.token_hex(16))
 
 # Load the crop recommendation model
 crop_model = joblib.load('crop_recommendation_model.pkl')
@@ -67,14 +71,20 @@ def login():
         password = request.form['password']
 
         if username and password == '1234':  # simple demo check
+            # Store username in session
+            session['username'] = username
             return redirect(url_for('welcome', username=username))
         else:
             return render_template('login.html', error="Invalid username or password")
 
     return render_template('login.html')
 
-@app.route('/welcome/<username>')
-def welcome(username):
+@app.route('/welcome')
+def welcome():
+    # Fetch username from session
+    username = session.get('username', None)  # None is the default value if username isn't found
+    if username is None:
+        return redirect(url_for('login'))  # If the user is not logged in, redirect to login
     return render_template('welcome.html', username=username)
 
 @app.route('/predict_plant', methods=['GET', 'POST'])

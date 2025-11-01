@@ -102,11 +102,8 @@ def get_ndvi_paths(bbox, datetime):
         "ndvi_plot": plot_path,      # Path to NDVI plot image
         "ndvi_netcdf": netcdf_path   # Path to NDVI NetCDF file
     }
-<<<<<<< HEAD
 
 def compute_ndvi_somehow():
     # Replace with actual logic to compute NDVI (using satellite data, etc.)
     # This is just a placeholder function.
     return xr.DataArray([1, 2, 3])  # Example placeholder
-=======
->>>>>>> bbb8dab81182f3e1c174e01bf9e0291016a3b371

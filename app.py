@@ -14,7 +14,7 @@ import xarray as xr
 import main_sat  # Ensure this import is here
 
 
-app = Flask(_name_)
+app = Flask(__name__)
 
 import secrets
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', secrets.token_hex(16))
@@ -66,11 +66,9 @@ def ndvi():
                 ndvi_netcdf_path=ndvi_paths["ndvi_netcdf"]  # Path to NDVI NetCDF
             )
         except Exception as e:
-            # Handle and display specific error messages
-            return f"Error processing NDVI: {str(e)}", 500
+            return f"Error processing NDVI: {e}", 500
 
     return render_template('ndvi.html')
-
 
 
 
@@ -154,8 +152,8 @@ def predict_plant():
 
         # Map the class to a label (ensure mapping covers indices)
         ref = {
-            0: 'Pepper_bell__Bacterial_spot',
-            1: 'Pepper_bell__healthy',
+            0: 'Pepper__bell___Bacterial_spot',
+            1: 'Pepper__bell___healthy',
             2: 'Potato___Early_blight',
             3: 'Potato___Late_blight',
             4: 'Potato___healthy',
@@ -166,7 +164,7 @@ def predict_plant():
             9: 'Tomato_Septoria_leaf_spot',
             10: 'Tomato_Spider_mites_Two_spotted_spider_mite',
             11: 'Tomato__Target_Spot',
-            12: 'Tomato_Tomato_YellowLeaf_Curl_Virus',
+            12: 'Tomato__Tomato_YellowLeaf__Curl_Virus',
             13: 'Tomato__Tomato_mosaic_virus',
             14: 'Tomato_healthy'
         }
@@ -175,8 +173,8 @@ def predict_plant():
 
         # Disease Treatment Suggestions (same mapping)
         treatment_suggestions = {
-            'Pepper_bell__Bacterial_spot': "Apply bactericides and remove infected leaves.",
-            'Pepper_bell__healthy': "No treatment needed. Keep the plant healthy with proper care.",
+            'Pepper__bell___Bacterial_spot': "Apply bactericides and remove infected leaves.",
+            'Pepper__bell___healthy': "No treatment needed. Keep the plant healthy with proper care.",
             'Potato___Early_blight': "Use fungicides and remove affected leaves.",
             'Potato___Late_blight': "Spray fungicides and remove infected plant parts.",
             'Potato___healthy': "No treatment required. Ensure well-draining soil.",
@@ -187,7 +185,7 @@ def predict_plant():
             'Tomato_Septoria_leaf_spot': "Remove infected leaves and apply appropriate fungicides.",
             'Tomato_Spider_mites_Two_spotted_spider_mite': "Use insecticides or natural predators to control spider mites.",
             'Tomato__Target_Spot': "Apply fungicide and remove affected leaves.",
-            'Tomato_Tomato_YellowLeaf_Curl_Virus': "No cure, but you can control vector spread using insecticides.",
+            'Tomato__Tomato_YellowLeaf__Curl_Virus': "No cure, but you can control vector spread using insecticides.",
             'Tomato__Tomato_mosaic_virus': "No cure. Remove infected plants to prevent virus spread.",
             'Tomato_healthy': "No treatment required. Keep the plant healthy with balanced care."
         }
@@ -232,5 +230,5 @@ def recommend_crop():
 
     return render_template('recommend_crop.html', crop_result=None)
 
-if _name_ == '_main_':
+if __name__ == '__main__':
     app.run(debug=True, use_reloader=False)

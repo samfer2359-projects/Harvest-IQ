@@ -1,0 +1,37 @@
+Test Case 1: Acidic Soil
+
+Input:
+
+Nitrogen (N): 30
+
+Phosphorus (P): 25
+
+Potassium (K): 50
+
+Soil pH: 5.0
+
+Moisture: 40%
+
+Expected Output:
+
+Status: "Acidic Soil"
+
+
+
+Test Case 2: Low Moisture
+
+Input:
+
+Nitrogen (N): 60
+
+Phosphorus (P): 50
+
+Potassium (K): 40
+
+Soil pH: 7.0
+
+Moisture: 20%
+
+Expected Output:
+
+Status: "Low Moisture"

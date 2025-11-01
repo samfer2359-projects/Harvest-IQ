@@ -67,6 +67,19 @@
 <body>
   <div class="container"> 
     <h1>Fertilizer Recommendation</h1>
+
+    <!-- Soil Health Card Information -->
+    <div id="infoBox" class="hidden bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg mt-4">
+    <p class="text-gray-700">
+    Visit the official ICAR Soil Health Card website to know your soil's Nitrogen, Phosphorus, and Potassium values.
+    <br><br>
+    <a href="https://soilhealth.dac.gov.in/" target="_blank" class="text-blue-600 underline hover:text-blue-800">
+      ICAR Soil Health Card website
+    </a> 
+    <br><br>
+    </p>
+    </div>
+
     <form method="POST">
       <label>Nitrogen (N):</label>
       <input type="number" name="N" step="any" required>

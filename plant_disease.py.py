@@ -1,3 +1,5 @@
+# This code was developed and executed in a Google Colab environment.
+
 # -*- coding: utf-8 -*-
 """python projects
 
@@ -7,7 +9,6 @@ Original file is located at
     https://colab.research.google.com/drive/1yUz5dCTIOZ-doPpMaZmdtxX5O20FERTg
 """
 
-# HarvestIQ
 #import dataset
 from google.colab import files
 files.upload()                           # Upload your kaggle.json file
@@ -37,10 +38,10 @@ import keras
 from  tensorflow.keras.preprocessing.image import ImageDataGenerator , img_to_array , load_img
 from keras.applications.vgg19 import VGG19 , preprocess_input , decode_predictions
 
-#EDA exploratory data analysis
+#EDA: exploratory data analysis ; list folders
 len(os.listdir("plantdisease/PlantVillage"))
 
-#Prepare images by applying random transformations
+#Prepare images by applying transformations
 train_datagen = ImageDataGenerator(zoom_range= 0.5, shear_range= 0.3, horizontal_flip=True, preprocessing_function= preprocess_input)
 val_datagen = ImageDataGenerator(preprocessing_function= preprocess_input)
 
@@ -112,7 +113,6 @@ plt.title("acc vs v-acc")
 plt.show()
 
 #load best model
-
 from keras.models import load_model
 
 model = load_model("/content/best_plant_disease_model.h5")

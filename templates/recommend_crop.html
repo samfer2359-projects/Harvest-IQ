@@ -4,13 +4,85 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crop Recommendation</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    
+    <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #e6f4ea;
+      color: #2f4f2f;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 500px;
+      margin: 50px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #2e7d32;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #2e7d32;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1b5e20;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #f0fff0;
+      border-left: 5px solid #2e7d32;
+    }
+    a {
+      width: 100%;
+      padding: 10px;
+      background-color: #2e7d32;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    a:hover {
+      background-color: #1b5e20;
+    }
+  </style>
 </head>
 <body>
 
     <header>
         <h1>Crop Recommendation</h1>
     </header>
+
+    <!-- Soil Health Card Information -->
+    <div id="infoBox" class="hidden bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg mt-4">
+    <p class="text-gray-700">
+    Visit the official ICAR Soil Health Card website to know your soil's Nitrogen, Phosphorus, and Potassium values.
+    <br><br>
+    <a href="https://soilhealth.dac.gov.in/" target="_blank" class="text-blue-600 underline hover:text-blue-800">
+      ICAR Soil Health Card website
+    </a> 
+    <br><br>
+    </p>
+    </div>
+
 
     <div class="container">
         <form action="/recommend_crop" method="POST">

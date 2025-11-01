@@ -1,5 +1,6 @@
+#Simple rule-based fertilizer recommendation system.
+
 def recommend_fertilizer(N, P, K, ph, moisture):
-    """Simple rule-based fertilizer recommendation system."""
     
     # Check for pH first since it affects nutrient availability
     if ph < 5.5:

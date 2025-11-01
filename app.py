@@ -8,13 +8,9 @@ from io import BytesIO
 import tensorflow as tf
 from werkzeug.utils import secure_filename
 import pandas as pd
-import matplotlib.pyplot as plt  # <-- Add this import for plotting
+import matplotlib.pyplot as plt  
 import xarray as xr
-
 from fertilizer_recommendation import recommend_fertilizer
-
-
-import main_sat  # Ensure this import is here
 
 
 app = Flask(__name__)
@@ -39,39 +35,6 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 @app.route('/')
 def index():
     return render_template('index.html', result='', suggestion='')
-
-
-
-import main_sat  # Import your script that computes NDVI
-
-@app.route('/ndvi', methods=['GET', 'POST'])
-def ndvi():
-    if request.method == 'POST':
-        try:
-            # Get values from the form submission
-            lon_min = float(request.form['lon_min'])
-            lat_min = float(request.form['lat_min'])
-            lon_max = float(request.form['lon_max'])
-            lat_max = float(request.form['lat_max'])
-            time_range = request.form['time_range']
-
-            # Call the NDVI calculation logic from `main_sat.py`
-            ndvi_paths = main_sat.get_ndvi_paths(
-                [lon_min, lat_min, lon_max, lat_max],  # Bounding box
-                time_range  # Time range
-            )
-
-            # Render the template with paths to the NDVI plot and NetCDF file
-            return render_template(
-                'ndvi.html',
-                ndvi_result="✅ NDVI calculation complete!",
-                ndvi_image_path=ndvi_paths["ndvi_plot"],  # Path to NDVI plot
-                ndvi_netcdf_path=ndvi_paths["ndvi_netcdf"]  # Path to NDVI NetCDF
-            )
-        except Exception as e:
-            return f"Error processing NDVI: {e}", 500
-
-    return render_template('ndvi.html')
 
 
 @app.route('/fertilizer', methods=['GET', 'POST'])
@@ -139,7 +102,7 @@ def predict_plant():
         # --- Preprocess image for VGG19 ---
         try:
             img = Image.open(filepath)
-            # Convert to RGB (handles grayscale / RGBA)
+            # Convert to RGB 
             if img.mode != 'RGB':
                 img = img.convert('RGB')
             img = img.resize((256, 256))   # Model expects 256x256 input size
@@ -148,7 +111,6 @@ def predict_plant():
         except Exception as e:
             return render_template('predict_plant.html', result=None, suggestion=None, error=f"Image processing error: {e}")
 
-            #Treatment suggestions dictionary
             
         # Expand dims and apply VGG19 preprocessing
         img_array = np.expand_dims(img_array, axis=0)
@@ -156,7 +118,7 @@ def predict_plant():
             from tensorflow.keras.applications.vgg19 import preprocess_input
         except Exception:
             # fallback if import path differs
-            from tensorflow.keras.applications.vgg19 import preprocess_input
+            from keras.applications.vgg19 import preprocess_input
 
         img_array = preprocess_input(img_array)  # important for VGG19
 
@@ -176,7 +138,7 @@ def predict_plant():
         top_idx = int(np.argmax(probs))
         top_prob = float(probs[top_idx])
 
-        # Map the class to a label (ensure mapping covers indices)
+        # Map the class to a label 
         ref = {
             0: 'Pepper__bell___Bacterial_spot',
             1: 'Pepper__bell___healthy',
@@ -197,7 +159,7 @@ def predict_plant():
 
         disease_prediction = ref.get(top_idx, 'Unknown Disease')
 
-        # Disease Treatment Suggestions (same mapping)
+        # Disease Treatment Suggestions
         treatment_suggestions = {
             'Pepper__bell___Bacterial_spot': "Apply bactericides and remove infected leaves.",
             'Pepper__bell___healthy': "No treatment needed. Keep the plant healthy with proper care.",
@@ -218,11 +180,10 @@ def predict_plant():
 
         treatment_suggestion = treatment_suggestions.get(disease_prediction, "Unknown treatment. Consult a specialist.")
 
-        # Also prepare top-3 suggestions for debugging / display if desired
+        #top-3 suggestions for debugging 
         top3_idx = np.argsort(probs)[-3:][::-1]
         top3 = [(int(i), ref.get(int(i), 'Unknown'), float(probs[int(i)])) for i in top3_idx]
 
-        # Pass prediction, confidence and optionally the top-3 to the template
         return render_template(
             'predict_plant.html',
             result=disease_prediction,

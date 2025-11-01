@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session 
 import os
 import joblib
 import numpy as np
@@ -11,8 +11,13 @@ import pandas as pd
 import matplotlib.pyplot as plt  # <-- Add this import for plotting
 import xarray as xr
 
+import main_sat  # Ensure this import is here
+
 
 app = Flask(_name_)
+
+import secrets
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', secrets.token_hex(16))
 
 # Load the crop recommendation model
 crop_model = joblib.load('crop_recommendation_model.pkl')
@@ -40,8 +45,18 @@ import main_sat  # Import your script that computes NDVI
 def ndvi():
     if request.method == 'POST':
         try:
-            # Call your main_sat logic to get NDVI paths
-            ndvi_paths = main_sat.get_ndvi_paths()  # This should return a dictionary with paths
+            # Get values from the form submission
+            lon_min = float(request.form['lon_min'])
+            lat_min = float(request.form['lat_min'])
+            lon_max = float(request.form['lon_max'])
+            lat_max = float(request.form['lat_max'])
+            time_range = request.form['time_range']
+
+            # Call the NDVI calculation logic from `main_sat.py`
+            ndvi_paths = main_sat.get_ndvi_paths(
+                [lon_min, lat_min, lon_max, lat_max],  # Bounding box
+                time_range  # Time range
+            )
 
             # Render the template with paths to the NDVI plot and NetCDF file
             return render_template(
@@ -51,9 +66,11 @@ def ndvi():
                 ndvi_netcdf_path=ndvi_paths["ndvi_netcdf"]  # Path to NDVI NetCDF
             )
         except Exception as e:
-            return f"Error processing NDVI: {e}", 500
+            # Handle and display specific error messages
+            return f"Error processing NDVI: {str(e)}", 500
 
     return render_template('ndvi.html')
+
 
 
 
@@ -67,14 +84,20 @@ def login():
         password = request.form['password']
 
         if username and password == '1234':  # simple demo check
+            # Store username in session
+            session['username'] = username
             return redirect(url_for('welcome', username=username))
         else:
             return render_template('login.html', error="Invalid username or password")
 
     return render_template('login.html')
 
-@app.route('/welcome/<username>')
-def welcome(username):
+@app.route('/welcome')
+def welcome():
+    # Fetch username from session
+    username = session.get('username', None)  # None is the default value if username isn't found
+    if username is None:
+        return redirect(url_for('login'))  # If the user is not logged in, redirect to login
     return render_template('welcome.html', username=username)
 
 @app.route('/predict_plant', methods=['GET', 'POST'])

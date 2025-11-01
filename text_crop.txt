@@ -30,6 +30,8 @@ Rainfall: 200
 answer: rice
 
 
+
+NDVI
 lon_min: -75.2
 
 lat_min: 40.6
@@ -38,3 +40,43 @@ lon_max: -75.1
 
 lat_max: 40.7
 date: 2025-01-01/2025-01-10	
+
+
+
+fertilizer
+Test Case 1: Acidic Soil
+
+Input:
+
+Nitrogen (N): 30
+
+Phosphorus (P): 25
+
+Potassium (K): 50
+
+Soil pH: 5.0
+
+Moisture: 40%
+
+Expected Output:
+
+Status: "Acidic Soil"
+
+
+Test Case 2: Low Moisture
+
+Input:
+
+Nitrogen (N): 60
+
+Phosphorus (P): 50
+
+Potassium (K): 40
+
+Soil pH: 7.0
+
+Moisture: 20%
+
+Expected Output:
+
+Status: "Low Moisture"

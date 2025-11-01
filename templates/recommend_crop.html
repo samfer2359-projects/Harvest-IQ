@@ -14,13 +14,15 @@
 
     <div class="container">
         <form action="/recommend_crop" method="POST">
-            <input type="number" name="N" placeholder="Nitrogen (N)" required>
-            <input type="number" name="P" placeholder="Phosphorus (P)" required>
-            <input type="number" name="K" placeholder="Potassium (K)" required>
-            <input type="number" name="temperature" placeholder="Temperature (°C)" required>
-            <input type="number" name="humidity" placeholder="Humidity (%)" required>
-            <input type="number" name="ph" placeholder="Soil pH" required>
-            <input type="number" name="rainfall" placeholder="Rainfall (mm)" required>
+
+
+            <input type="number" name="N" placeholder="Nitrogen (N)"  step="any" required>
+            <input type="number" name="P" placeholder="Phosphorus (P)"  step="any" required>
+            <input type="number" name="K" placeholder="Potassium (K)"  step="any" required>
+            <input type="number" name="temperature" placeholder="Temperature (°C)"  step="any" required>
+            <input type="number" name="humidity" placeholder="Humidity (%)"  step="any" required>
+            <input type="number" name="ph" placeholder="Soil pH"  step="any" required>
+            <input type="number" name="rainfall" placeholder="Rainfall (mm)"  step="any" required>
             <input type="submit" value="Recommend Crop">
         </form>
 

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fertilizer Recommendation - Harvest IQ</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #e6f4ea;
+      color: #2f4f2f;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 500px;
+      margin: 50px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #2e7d32;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #2e7d32;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1b5e20;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #f0fff0;
+      border-left: 5px solid #2e7d32;
+    }
+    a {
+      width: 100%;
+      padding: 10px;
+      background-color: #2e7d32;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    a:hover {
+      background-color: #1b5e20;
+    }
+  </style>
+</head>
+<body>
+  <div class="container"> 
+    <h1>Fertilizer Recommendation</h1>
+    <form method="POST">
+      <label>Nitrogen (N):</label>
+      <input type="number" name="N" step="any" required>
+
+      <label>Phosphorus (P):</label>
+      <input type="number" name="P" step="any" required>
+
+      <label>Potassium (K):</label>
+      <input type="number" name="K" step="any" required>
+
+      <label>Soil pH:</label>
+      <input type="number" name="ph" step="any" required>
+
+      <label>Moisture (%):</label>
+      <input type="number" name="moisture" step="any" required>
+
+      <button type="submit">Get Recommendation</button>
+    </form>
+
+    {% if result %}
+      <div class="result">
+        <h3>Status: {{ result.status }}</h3>
+        <p>Recommendation: {{ result.recommendation }}</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <a href="{{ url_for('welcome') }}" class="btn">Back to Home</a>
+
+</body>
+</html>

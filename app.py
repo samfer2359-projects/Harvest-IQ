@@ -11,6 +11,9 @@ import pandas as pd
 import matplotlib.pyplot as plt  # <-- Add this import for plotting
 import xarray as xr
 
+from fertilizer_recommendation import recommend_fertilizer
+
+
 import main_sat  # Ensure this import is here
 
 
@@ -71,6 +74,29 @@ def ndvi():
     return render_template('ndvi.html')
 
 
+@app.route('/fertilizer', methods=['GET', 'POST'])
+def fertilizer():
+    result = None
+    if request.method == 'POST':
+        try:
+            # Extract the form data
+            N = float(request.form['N'])
+            P = float(request.form['P'])
+            K = float(request.form['K'])
+            ph = float(request.form['ph'])
+            moisture = float(request.form['moisture'])
+
+            # Call the recommend_fertilizer function
+            status, recommendation = recommend_fertilizer(N, P, K, ph, moisture)
+
+            # Prepare the result to pass to the template
+            result = {"status": status, "recommendation": recommendation}
+
+        except ValueError as e:
+            # If there's an issue with the form data (e.g., not a number), show an error
+            result = {"status": "Error", "recommendation": "Please provide valid numerical inputs for all fields."}
+
+    return render_template('fertilizer.html', result=result)
 
 
 

@@ -2,7 +2,7 @@
 
 **"Smart Decisions. Better Harvests"**
 
-Harvest-IQ is a web application designed to help farmers make informed decisions based on weather, soil health, and plant disease data.
+Harvest-IQ is a web application designed to help farmers make informed decisions based on soil health, and plant disease data.
 
 ## Features
 

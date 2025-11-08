@@ -11,9 +11,31 @@ import pandas as pd
 import matplotlib.pyplot as plt  
 import xarray as xr
 from fertilizer_recommendation import recommend_fertilizer
+from flask_sqlalchemy import SQLAlchemy
+
 
 
 app = Flask(__name__)
+
+# Configure the app to use PostgreSQL database
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://your_username:your_password@localhost/your_dbname'
+
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Disable track modifications
+db = SQLAlchemy(app)
+
+class User(db.Model):
+    __tablename__ = 'users'  
+
+    user_id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(150), nullable=False)
+    email = db.Column(db.String(150), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)  
+
+    def __repr__(self):
+        return f"<User {self.name}>"
+
+
+
 
 import secrets
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', secrets.token_hex(16))
@@ -35,6 +57,74 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 @app.route('/')
 def index():
     return render_template('index.html', result='', suggestion='')
+
+import hashlib
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        # Get user input from the form
+        name = request.form['name']
+        email = request.form['email']
+        password = request.form['password']
+
+        # Hash the password (using SHA256 for simplicity)
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
+
+        # Check if the email is already taken
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            return render_template('signup.html', error="Email already exists.")
+
+        # Create a new user and add to the database
+        new_user = User(name=name, email=email, password_hash=hashed_password)  # Changed from 'password' to 'password_hash'
+
+        db.session.add(new_user)
+        db.session.commit()
+
+        # Redirect to login after successful signup
+        return redirect(url_for('login'))
+
+    return render_template('signup.html')
+
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':  # Start of the POST method block
+        username = request.form['email']  # Make sure you're using the correct form key
+        password = request.form['password']  # Get the password input
+
+        # Look for the user by email
+        user = User.query.filter_by(email=username).first()
+
+        if user:
+            # Hash the entered password and compare with the stored hashed password
+            hashed_password = hashlib.sha256(password.encode()).hexdigest()
+
+            if user.password_hash == hashed_password:  # Check the hashed password
+                # If login is successful, store user session and redirect
+                session['username'] = user.name
+                return redirect(url_for('welcome', username=user.name))
+            else:
+                return render_template('login.html', error="Invalid username or password")
+        else:
+            return render_template('login.html', error="User not found")
+
+    return render_template('login.html')
+
+
+
+
+@app.route('/welcome')
+def welcome():
+    username = session.get('username', None)
+    if username is None:
+        return redirect(url_for('login'))  # Redirect to login if not logged in
+    return render_template('welcome.html', username=username)
+
+
+
 
 
 @app.route('/fertilizer', methods=['GET', 'POST'])
@@ -64,28 +154,6 @@ def fertilizer():
 
 
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-
-        if username and password == '1234':  # simple demo check
-            # Store username in session
-            session['username'] = username
-            return redirect(url_for('welcome', username=username))
-        else:
-            return render_template('login.html', error="Invalid username or password")
-
-    return render_template('login.html')
-
-@app.route('/welcome')
-def welcome():
-    # Fetch username from session
-    username = session.get('username', None)  # None is the default value if username isn't found
-    if username is None:
-        return redirect(url_for('login'))  # If the user is not logged in, redirect to login
-    return render_template('welcome.html', username=username)
 
 @app.route('/predict_plant', methods=['GET', 'POST'])
 def predict_plant():
@@ -216,6 +284,13 @@ def recommend_crop():
         return render_template('recommend_crop.html', crop_result=recommended_crop)
 
     return render_template('recommend_crop.html', crop_result=None)
+
+@app.route('/logout')
+def logout():
+    session.pop('username', None)  # Remove the username from the session
+    return redirect(url_for('index'))  # Redirect to index page
+
+
 
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=False)

@@ -1,72 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Harvest IQ</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HarvestIQ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #e6f4ea;
-      color: #2f4f2f;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      text-align: center;
-    }
-    .logo {
-      width: 120px;
-      height: 120px;
-      background-color: #a8d5ba;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 48px;
-      color: white;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
-    h1 {
-      font-size: 2.5em;
-      margin-bottom: 20px;
-    }
-    button {
-      background-color: #4caf50;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1em;
-    }
-    button:hover {
-      background-color: #45a049;
-    }
-    footer {
-      text-align: center;
-      padding: 10px;
-      background-color: #a8d5ba;
-      color: white;
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      font-size: 0.9em;
+      background: linear-gradient(to bottom, #fff8c8, #ffffff 50%, #c8f3d0);
+      font-family: 'Poppins', sans-serif;
     }
   </style>
 </head>
-<body>
-  <div class="logo">🌿</div>
-  <h1>Harvest IQ</h1>
-  <p>Smart Farming Assistant</p>
-  <button onclick="window.location.href='/login'">Login</button>
+<body class="min-h-screen flex justify-center items-center p-4">
 
-  <footer>
-    © 2025 Harvest IQ - College Project by Neha Jaiswal
-  </footer>
+  <!-- Center Card -->
+  <div class="bg-white shadow-2xl rounded-3xl p-12 text-center max-w-xl w-full">
+
+    <!-- Logo + Name -->
+    <div class="flex justify-center items-center gap-2 mb-4">
+      <img src="https://cdn-icons-png.flaticon.com/512/7660/7660445.png" class="w-12 h-12" />
+      <h1 class="text-4xl font-extrabold text-green-700">HarvestIQ</h1>
+    </div>
+
+    <!-- Tagline -->
+    <p class="text-gray-600 text-lg mb-8 font-medium">Smart Farming • AI Insights • Greener Future</p>
+
+    <!-- Features -->
+    <div class="flex justify-center gap-5 mb-10 flex-wrap">
+      <div class="bg-white shadow-md p-5 rounded-2xl w-32 hover:shadow-xl transition-all">
+        <img src="https://cdn-icons-png.flaticon.com/512/2907/2907155.png" class="w-10 mx-auto mb-2" />
+        <p class="font-medium">Soil Health</p>
+      </div>
+
+      <div class="bg-white shadow-md p-5 rounded-2xl w-32 hover:shadow-xl transition-all">
+        <img src="https://cdn-icons-png.flaticon.com/512/1163/1163624.png" class="w-10 mx-auto mb-2" />
+        <p class="font-medium">Climate</p>
+      </div>
+
+      <div class="bg-white shadow-md p-5 rounded-2xl w-32 hover:shadow-xl transition-all">
+        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" class="w-10 mx-auto mb-2" />
+        <p class="font-medium">Insights</p>
+      </div>
+    </div>
+
+    <!-- Button -->
+    <a href="signup.html"
+       class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-full text-lg font-semibold shadow-lg flex items-center gap-2 mx-auto transition block text-center">
+      Get Started 🚜
+    </a>
+
+  </div>
+
 </body>
 </html>

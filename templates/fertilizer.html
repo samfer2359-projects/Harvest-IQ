@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crop Recommendation</title>
-    
-    <style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fertilizer Recommendation - Harvest IQ</title>
+  <style>
     body {
       font-family: Arial, sans-serif;
       background-color: #e6f4ea;
@@ -66,10 +65,8 @@
   </style>
 </head>
 <body>
-
-    <header>
-        <h1>Crop Recommendation</h1>
-    </header>
+  <div class="container"> 
+    <h1>Fertilizer Recommendation</h1>
 
     <!-- Soil Health Card Information -->
     <div id="infoBox" class="hidden bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg mt-4">
@@ -83,30 +80,34 @@
     </p>
     </div>
 
+    <form method="POST">
+      <label>Nitrogen (N):</label>
+      <input type="number" name="N" step="any" required>
 
-    <div class="container">
-        <form action="/recommend_crop" method="POST">
+      <label>Phosphorus (P):</label>
+      <input type="number" name="P" step="any" required>
 
+      <label>Potassium (K):</label>
+      <input type="number" name="K" step="any" required>
 
-            <input type="number" name="N" placeholder="Nitrogen (N)"  step="any" required>
-            <input type="number" name="P" placeholder="Phosphorus (P)"  step="any" required>
-            <input type="number" name="K" placeholder="Potassium (K)"  step="any" required>
-            <input type="number" name="temperature" placeholder="Temperature (°C)"  step="any" required>
-            <input type="number" name="humidity" placeholder="Humidity (%)"  step="any" required>
-            <input type="number" name="ph" placeholder="Soil pH"  step="any" required>
-            <input type="number" name="rainfall" placeholder="Rainfall (mm)"  step="any" required>
-            <input type="submit" value="Recommend Crop">
-        </form>
+      <label>Soil pH:</label>
+      <input type="number" name="ph" step="any" required>
 
-        {% if crop_result %}
-        <div class="result-box">
-            <h3>Recommended Crop:</h3>
-            <textarea rows="2" readonly>{{ crop_result }}</textarea>
-        </div>
-        {% endif %}
-    </div>
+      <label>Moisture (%):</label>
+      <input type="number" name="moisture" step="any" required>
 
-    <a href="{{ url_for('welcome') }}" class="btn">Back to Home</a>
+      <button type="submit">Get Recommendation</button>
+    </form>
+
+    {% if result %}
+      <div class="result">
+        <h3>Status: {{ result.status }}</h3>
+        <p>Recommendation: {{ result.recommendation }}</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <a href="{{ url_for('welcome') }}" class="btn">Back to Home</a>
 
 </body>
 </html>

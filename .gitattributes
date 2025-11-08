@@ -1,3 +1,0 @@
-ndvi_output.nc filter=lfs diff=lfs merge=lfs -text
-static/*.nc filter=lfs diff=lfs merge=lfs -text
-static/ndvi_output_1.nc filter=lfs diff=lfs merge=lfs -text

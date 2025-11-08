@@ -1,3 +1,5 @@
+# This code was developed and executed in a Google Colab environment.
+
 # -*- coding: utf-8 -*-
 """crop1
 
@@ -28,22 +30,22 @@ import io
 # Upload dataset
 uploaded = files.upload()
 
-# Assuming CSV filename is 'Crop_recommendation.csv'
+# CSV filename is 'Crop_recommendation.csv'
 csv_filename = 'Crop_recommendation.csv'
 df = pd.read_csv(io.BytesIO(uploaded[csv_filename]))
 
-# Display basic info
+# Displaying basic info
 print(df.head())
 print(df.info())
 print("\nMissing values:\n", df.isnull().sum())
 
-# Visualize correlations
+# Visualizing correlations
 plt.figure(figsize=(8, 6))
 sns.heatmap(df.drop('label', axis=1).corr(), annot=True, cmap="YlGnBu")
 plt.title("Feature Correlation Heatmap")
 plt.show()
 
-# Visualize crop distribution
+# Visualizing crop distribution
 plt.figure(figsize=(12, 6))
 sns.countplot(y='label', data=df, order=df['label'].value_counts().index)
 plt.title("Crop Distribution")
@@ -74,7 +76,7 @@ plt.ylabel("Actual")
 plt.title("Confusion Matrix")
 plt.show()
 
-# Save the trained model
+# Saving the trained model
 joblib.dump(model, 'crop_recommendation_model.pkl')
 
 # Function to predict crop for new inputs

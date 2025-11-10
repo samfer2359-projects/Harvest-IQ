@@ -4,66 +4,107 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Welcome - Harvest IQ</title>
+
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #e6f4ea;
-      color: #2f4f2f;
       margin: 0;
       padding: 0;
+      font-family: Arial, sans-serif;
+      color: #fff;
+      text-align: center;
+      height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Background Video */
+    video.bg-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
       height: 100vh;
-      text-align: center;
+      object-fit: cover;
+      z-index: -1;
+      filter: brightness(70%);
     }
-    h1 {
-      font-size: 2.5em;
-      margin-bottom: 10px;
+
+    /* Content Glass Box */
+    .content-box {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(4px);
+      padding: 30px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.3);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
     }
-    p {
-      font-size: 1.2em;
-    }
-    .buttons {
-      margin-top: 30px;
-    }
-    button {
-      background-color: #4caf50;
+
+    .buttons button, .logout-btn {
+      background-color: rgba(76, 175, 80, 0.9);
       color: white;
       border: none;
       padding: 10px 20px;
-      border-radius: 5px;
+      border-radius: 8px;
       cursor: pointer;
-      margin: 10px;
+      margin: 8px;
+      font-size: 1rem;
     }
-    button:hover {
-      background-color: #45a049;
+
+    .buttons button:hover {
+      background-color: rgba(69,160,73,0.9);
     }
+
+    /* Logout */
+    .logout-btn {
+      background-color: rgba(230, 45, 45, 0.9);
+      position: absolute;
+      top: 18px;
+      right: 20px;
+      font-size: 0.9rem;
+      padding: 8px 15px;
+    }
+
+    .logout-btn:hover {
+      background-color: rgba(200, 20, 20, 0.9);
+    }
+
     footer {
-      text-align: center;
-      padding: 10px;
-      background-color: #a8d5ba;
-      color: white;
       position: fixed;
-      bottom: 0;
+      bottom: 10px;
       width: 100%;
+      text-align: center;
+      font-size: 0.9rem;
+      text-shadow: 1px 1px 3px black;
     }
   </style>
 </head>
 <body>
-  <h1>Welcome, {{ username }}!</h1>
-  <p>Thank you for using Harvest IQ 🌱</p>
 
-  <div class="buttons">
-    <button onclick="window.location.href='/fertilizer'">Fertilizer Recommendation</button>
-    <button onclick="window.location.href='/recommend_crop'">Crop Recommendation</button>
-    <button onclick="window.location.href='/predict_plant'">Plant Disease Detection</button>
-    <button onclick="window.location.href='/logout'">Logout</button>  <!-- Add the Logout button -->
+  <!-- ✅ Background Video -->
+  <video class="bg-video" autoplay loop muted playsinline>
+    <source src="{{ url_for('static', filename='welcome_1.mp4') }}" type="video/mp4">
+  </video>
+
+  <!-- ✅ Logout Button -->
+  <button class="logout-btn" onclick="window.location.href='/logout'">Logout</button>
+
+  <!-- ✅ Main Content -->
+  <div class="content-box">
+    <h1>Welcome, {{ username }}! 🌿</h1>
+    <p>Thank you for using Harvest IQ 🌱</p>
+
+    <div class="buttons">
+      <button onclick="window.location.href='/fertilizer'">Fertilizer Recommendation</button>
+      <button onclick="window.location.href='/recommend_crop'">Crop Recommendation</button>
+      <button onclick="window.location.href='/predict_plant'">Plant Disease Detection</button>
+    </div>
   </div>
 
-  <footer>
-    &copy; 2025 Harvest IQ - College Project by Neha Jaiswal
-  </footer>
+  
+
 </body>
 </html>

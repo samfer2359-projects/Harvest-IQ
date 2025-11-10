@@ -65,7 +65,6 @@
       background-color: #1b5e20;
     }
 
-   
 
   </style>
 </head>
@@ -81,18 +80,19 @@
     <div class="container">
         <form action="/predict_plant" method="POST" enctype="multipart/form-data">
             <input type="file" name="image" accept="image/*" required>
-            <input type="submit" value="Upload and Predict">
+            <button type="submit">Upload and Predict</button>
+
         </form>
 
         {% if result %}
         <div class="result-box">
             <h3>Prediction Result:</h3>
-            <textarea rows="2" readonly>{{ result }}</textarea>
+            <textarea rows="2" cols="65" readonly>{{ result }}</textarea>
         </div>
 
         <div class="result-box">
             <h3>Treatment Suggestion:</h3>
-            <textarea rows="10" readonly>{{ suggestion }}</textarea>
+            <textarea rows="10" cols="65" readonly>{{ suggestion }}</textarea>
         </div>
         {% endif %}
     </div>

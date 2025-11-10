@@ -20,7 +20,9 @@ app = Flask(__name__)
 # Configure the app to use PostgreSQL database
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://your_username:your_password@localhost/your_dbname'
 
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Disable track modifications
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+ 
+# Disable track modifications
 db = SQLAlchemy(app)
 
 class User(db.Model):

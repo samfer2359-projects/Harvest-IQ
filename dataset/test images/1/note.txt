@@ -1,0 +1,5 @@
+potato early blight -> potato late blight
+
+tomato early blight -> Tomato_Septoria_leaf_spot
+
+tomato leaf mold -> Tomato__Tomato_YellowLeaf__Curl_Virus

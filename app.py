@@ -22,7 +22,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:root@localhost/harvestiq'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
  
-# Disable track modifications
+
 db = SQLAlchemy(app)
 
 class User(db.Model):
@@ -70,7 +70,7 @@ def signup():
         email = request.form['email']
         password = request.form['password']
 
-        # Hash the password (using SHA256 for simplicity)
+        # Hash the password (using SHA256)
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
 
         # Check if the email is already taken
@@ -169,7 +169,7 @@ def predict_plant():
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         image_file.save(filepath)
 
-        # --- Preprocess image for VGG19 ---
+        # Preprocess image for VGG19 
         try:
             img = Image.open(filepath)
             # Convert to RGB 

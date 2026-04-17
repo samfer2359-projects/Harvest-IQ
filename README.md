@@ -55,4 +55,4 @@ Harvest-IQ provides actionable recommendations by combining environmental data a
 
 ## Notes
 
-This project was developed as part of academic coursework. It demonstrates the integration of web development with machine learning models for real-world problem solvin
+This project was developed as part of academic coursework. It demonstrates the integration of web development with machine learning models for real-world problem solving.

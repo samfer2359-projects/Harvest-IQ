@@ -1,0 +1,13 @@
+Flask
+Flask-SQLAlchemy
+psycopg2-binary
+numpy
+pandas
+scikit-learn
+joblib
+tensorflow
+keras
+Pillow
+matplotlib
+xarray
+Werkzeug

@@ -47,7 +47,7 @@ Harvest-IQ provides actionable recommendations by combining environmental data a
 
 ---
 
-# 🖥️ Website Screenshots
+# Website Screenshots
 
 ## Home Page
 ![Home Page](static/ui/home.png)

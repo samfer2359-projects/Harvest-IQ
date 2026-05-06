@@ -59,16 +59,25 @@ Harvest-IQ provides actionable recommendations by combining environmental data a
 ![Login Page](static/ui/login.png)
 
 ## Welcome Dashboard
-![Welcome Page](static/ui/welcome.png)
+![Welcome Page](static/ui/main.png)
 
 ## Crop Recommendation System
-![Crop Recommendation Page](static/ui/crop.png)
+### User fills form details
+![Crop Recommendation Page](static/ui/cr1.png)
+### Results
+![Crop Recommendation Page](static/ui/cr2.png)
 
 ## Fertilizer Recommendation System
-![Fertilizer Recommendation Page](static/ui/fertilizer.png)
+### User fills form details
+![Fertilizer Recommendation Page](static/ui/fr1.png)
+### Results
+![Fertilizer Recommendation Page](static/ui/fr2.png)
 
 ## Plant Disease Detection
-![Plant Disease Detection Page](static/ui/disease.png)
+### User uploads photo of plant leaf to check if it is healthy or has disease
+![Plant Disease Detection Page](static/ui/pdp1.png)
+### Results
+![Plant Disease Detection Page](static/ui/pdp2.png)
 
 ---
 ## Installation and Setup

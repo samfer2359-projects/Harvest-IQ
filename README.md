@@ -46,6 +46,31 @@ Harvest-IQ provides actionable recommendations by combining environmental data a
 4. Results are displayed through a web interface  
 
 ---
+
+# 🖥️ Website Screenshots
+
+## Home Page
+![Home Page](static/ui/home.png)
+
+## Sign Up Page
+![Sign Up Page](static/ui/signup.png)
+
+## Login Page
+![Login Page](static/ui/login.png)
+
+## Welcome Dashboard
+![Welcome Page](static/ui/welcome.png)
+
+## Crop Recommendation System
+![Crop Recommendation Page](static/ui/crop.png)
+
+## Fertilizer Recommendation System
+![Fertilizer Recommendation Page](static/ui/fertilizer.png)
+
+## Plant Disease Detection
+![Plant Disease Detection Page](static/ui/disease.png)
+
+---
 ## Installation and Setup
 
 # Clone the repository

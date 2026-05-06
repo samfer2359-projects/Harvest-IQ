@@ -46,6 +46,21 @@ Harvest-IQ provides actionable recommendations by combining environmental data a
 4. Results are displayed through a web interface  
 
 ---
+## Installation and Setup
+
+# Clone the repository
+git clone https://github.com/your-username/Harvest-IQ.git
+
+# Move into project directory
+cd Harvest-IQ
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the application
+python app.py
+
+---
 
 ## Contributors
 

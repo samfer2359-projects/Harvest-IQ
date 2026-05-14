@@ -10,6 +10,41 @@ Harvest-IQ provides actionable recommendations by combining environmental data a
 
 ---
 
+
+# Website Screenshots
+
+## Home Page
+![Home Page](static/ui/home.png)
+
+## Sign Up Page
+![Sign Up Page](static/ui/signup.png)
+
+## Login Page
+![Login Page](static/ui/login.png)
+
+## Welcome Dashboard
+![Welcome Page](static/ui/main.png)
+
+## Crop Recommendation System
+### User fills form details
+![Crop Recommendation Page](static/ui/cr1.png)
+### Results
+![Crop Recommendation Page](static/ui/cr2.png)
+
+## Fertilizer Recommendation System
+### User fills form details
+![Fertilizer Recommendation Page](static/ui/fr1.png)
+### Results
+![Fertilizer Recommendation Page](static/ui/fr2.png)
+
+## Plant Disease Detection
+### User uploads photo of plant leaf to check if it is healthy or has disease
+![Plant Disease Detection Page](static/ui/pdp1.png)
+### Results
+![Plant Disease Detection Page](static/ui/pdp2.png)
+
+---
+
 ## Key Features
 
 ### Crop Recommendation
@@ -46,40 +81,6 @@ Harvest-IQ provides actionable recommendations by combining environmental data a
 4. Results are displayed through a web interface  
 
 ---
-
-# Website Screenshots
-
-## Home Page
-![Home Page](static/ui/home.png)
-
-## Sign Up Page
-![Sign Up Page](static/ui/signup.png)
-
-## Login Page
-![Login Page](static/ui/login.png)
-
-## Welcome Dashboard
-![Welcome Page](static/ui/main.png)
-
-## Crop Recommendation System
-### User fills form details
-![Crop Recommendation Page](static/ui/cr1.png)
-### Results
-![Crop Recommendation Page](static/ui/cr2.png)
-
-## Fertilizer Recommendation System
-### User fills form details
-![Fertilizer Recommendation Page](static/ui/fr1.png)
-### Results
-![Fertilizer Recommendation Page](static/ui/fr2.png)
-
-## Plant Disease Detection
-### User uploads photo of plant leaf to check if it is healthy or has disease
-![Plant Disease Detection Page](static/ui/pdp1.png)
-### Results
-![Plant Disease Detection Page](static/ui/pdp2.png)
-
----
 ## Installation and Setup
 
 # Clone the repository
@@ -105,3 +106,9 @@ python app.py
 ## Notes
 
 This project was developed as part of academic coursework. It demonstrates the integration of web development with machine learning models for real-world problem solving.
+
+
+## Project Status
+
+This project is currently configured for local development.  
+A production deployment version is planned as part of future improvements.

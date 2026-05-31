@@ -1,6 +1,7 @@
 # Harvest-IQ
 
-Smart, data-driven web application designed to help farmers make better decisions on crop selection, disease detection, and fertilizer usage using environmental and image-based inputs.
+Smart, data-driven web application designed to help farmers make better decisions on crop selection, disease detection, and fertilizer usage using environmental and image-based inputs.  
+All challenges and lessons learned are documented in `/docs/lessons-learned.md`.
 
 ---
 
